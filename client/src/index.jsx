@@ -11,18 +11,26 @@ class App extends React.Component {
       repos: []
     }
 
+    this.updateRepos();
   }
 
   search (term) {
     console.log(`${term} was searched`);
-    // TODO
+    
+    $.post('http://localhost:1128/repos', {username: term})
+      .then(() => this.updateRepos());
+  }
+
+  updateRepos() {
+    $.get('http://localhost:1128/repos')
+      .then(results => this.setState({repos: results}));
   }
 
   render () {
     return (<div>
       <h1>Github Fetcher</h1>
-      <RepoList repos={this.state.repos}/>
       <Search onSearch={this.search.bind(this)}/>
+      <RepoList repos={this.state.repos}/>
     </div>)
   }
 }
