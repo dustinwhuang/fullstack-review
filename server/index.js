@@ -14,11 +14,14 @@ app.post('/repos', function (req, res) {
   // This route should take the github username provided
   // and get the repo information from the github API, then
   // save the repo information in the database
-  gh.getReposByUsername(req.body.username, repos => db.save(repos).then(() => res.end()));
+  gh.getReposByUsername(req.body.username)
+    .then(repos => db.save(repos))
+    .then(modified => res.send(modified));
 });
 
 app.get('/repos', function (req, res) {
-  db.getRepos((err, repos) => res.send(repos));
+  db.getRepos()
+    .then(repos => res.send(repos));
 });
 
 let port = 1128;

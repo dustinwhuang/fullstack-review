@@ -1,10 +1,10 @@
 import React from 'react';
 import RepoListView from './RepoListView.jsx';
 
-const RepoList = ({repos}) => (
+const RepoList = ({repos, modified:{added, updated, skipped}}) => (
   <div>
-    <h4> Repo List Component </h4>
-    Top {repos.length} repos by forks.
+    <h3>{`${added == 0 ? '' : added + ' new repos imported '} ${updated == 0 ? '' : updated + ' repos updated '} ${skipped == 0 ? '' : skipped + ' repos skipped'}`}</h3>
+    <h4>Top {repos.length} repos by forks.</h4>
     {repos.map((repo, key) => <RepoListView repo={repo} key={key} />)}
   </div>
 )
