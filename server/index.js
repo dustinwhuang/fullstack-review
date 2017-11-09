@@ -24,6 +24,21 @@ app.get('/repos', function (req, res) {
     .then(repos => res.send(repos));
 });
 
+app.get('/users', function (req, res) {
+  db.getUsers()
+    .then(users => res.send(users));
+});
+
+app.get('/user', function (req, res) {
+  db.getUserRepos(req.query.user._id)
+    .then(repos => res.send(repos));
+});
+
+app.get('/user/friends', function (req, res) {
+  db.getUserFriends(req.query.user)
+    .then(friends => res.send(friends));
+});
+
 let port = 1128;
 
 app.listen(port, function() {

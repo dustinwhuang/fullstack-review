@@ -20,7 +20,7 @@ let getReposByUsername = (username) => {
       if (res.statusCode === 200){
         resolve(JSON.parse(body));
       } else {
-        reject('No repos found');
+        reject('No repos found github');
       }
     });
   });

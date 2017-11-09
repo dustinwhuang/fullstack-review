@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 const gh = require('../helpers/github');
+mongoose.Promise = global.Promise;
 
 mongoose.connect('mongodb://localhost/fetcher', {useMongoClient: true});
 
 let repoSchema = mongoose.Schema({
   _id: Number,
-  owner_login: String,
+  owner: {type: Number, ref: 'User'},
   name: String,
   url: String,
   description: String,
@@ -19,8 +20,8 @@ let userSchema = mongoose.Schema({
 });
 
 let contributorSchema = mongoose.Schema({
-  repo_id: Number,
-  user_id: Number
+  repo_id: {type: Number, ref: 'Repo'},
+  login: String
 });
 
 let Repo = mongoose.model('Repo', repoSchema);
@@ -33,11 +34,12 @@ let save = (repos) => {
       reject('Not valid repos');
     }
 
-    User.create({_id: repos[0].owner.id, login: repos[0].owner.login});
+    User.create({_id: repos[0].owner.id, login: repos[0].owner.login})
+      .catch(() => {/* ignore duplicate error */});
 
     let status = {added: 0, updated: 0, skipped: 0};
     repos && repos.forEach(({id, name, owner, description, html_url, forks, updated_at, contributors_url}) => {
-      let docs = {_id: id, owner_login: owner.login, name: name, url: html_url, description: description, forks: forks, updated_at: updated_at};
+      let docs = {_id: id, owner: owner.id, name: name, url: html_url, description: description, forks: forks, updated_at: updated_at};
       Repo.create(docs)
         .then(() => {
           status.added++;
@@ -59,8 +61,10 @@ let save = (repos) => {
 
       gh.getContributors(contributors_url)
         .then(contributors => contributors.forEach(contributor => {
-          Contributor.create({repo_id: id, user_id: contributor.id});
-          User.create({_id: id, login: contributor.login});
+          Contributor.create({repo_id: id, login: contributor.login});
+          // Don't add contributors to users, or else massive tree start building
+          // User.create({_id: contributor.id, login: contributor.login})
+          //   .catch(() => {/* ignore duplicate error */});
         }));
     });
 
@@ -74,12 +78,37 @@ let save = (repos) => {
 
 const getRepos = () => {
   return new Promise((resolve, reject) => {
-    Repo.find().sort({forks: -1}).limit(25)
+    Repo.find().populate('owner').sort({forks: -1}).limit(25)
       .exec((err, repos) => resolve(repos));
+  });
+};
+
+const getUsers = () => {
+  return new Promise((resolve, reject) => {
+    User.find()
+      .exec((err, users) => resolve(users));
+  });
+};
+
+const getUserRepos = (id) => {
+  return new Promise((resolve, reject) => {
+    Repo.find({owner: id}).sort({forks: -1}).limit(10)
+      .exec((err, repos) => resolve(repos));
+  });
+};
+
+const getUserFriends = (user) => {
+  return new Promise((resolve, reject) => {
+    Contributor.find().populate({path: 'repo_id', populate: {path: 'owner'}})
+      // .exec((err, friends) => console.log(friends.filter(friend => console.log(friend.repo_id.owner.login, friend.login))));
+      .exec((err, friends) => resolve(friends.filter(friend => friend.repo_id.owner._id === parseInt(user._id) && friend.repo_id.owner.login !== friend.login)));
   });
 };
 
 module.exports = {
   save: save,
-  getRepos: getRepos
+  getRepos: getRepos,
+  getUsers: getUsers,
+  getUserRepos: getUserRepos,
+  getUserFriends: getUserFriends
 };
