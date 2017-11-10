@@ -30,8 +30,10 @@ app.get('/users', function (req, res) {
 });
 
 app.get('/user', function (req, res) {
-  db.getUserRepos(req.query.user._id)
-    .then(repos => res.send(repos));
+  if (req.query.user._id) {
+    db.getUserRepos(req.query.user._id)
+      .then(repos => res.send(repos));
+  }
 });
 
 app.get('/user/friends', function (req, res) {

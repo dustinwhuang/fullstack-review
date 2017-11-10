@@ -1,10 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
+import {HashRouter, Redirect, Link, Switch, Route, withRouter} from 'react-router-dom';
 import Search from './components/Search.jsx';
 import RepoList from './components/RepoList.jsx';
 import UserList from './components/UserList.jsx';
-import {HashRouter, Redirect, Link, Switch, Route} from 'react-router-dom';
+import UserView from './components/UserView.jsx';
 
 class App extends React.Component {
   constructor(props) {
@@ -12,7 +13,8 @@ class App extends React.Component {
     this.state = { 
       repos: [],
       modified: {added: 0, updated: 0, skipped: 0},
-      users: []
+      users: [],
+      user: {}
     }
 
     this.updateRepos();
@@ -40,6 +42,15 @@ class App extends React.Component {
       .then(results => this.setState({users: results}));
   }
 
+  handleUserClick(user) {
+    this.setState({user: user});
+    this.props.history.push(`/users/${user.login}`);
+  }
+
+  onEnter(e) {
+    console.log(e);
+  }
+
   render () {
     return (
       <div>
@@ -54,7 +65,8 @@ class App extends React.Component {
         </h3>
         <Switch>
           <Route path='/repos' render={routeProps => <RepoList repos={this.state.repos} />} />
-          <Route path='/users' render={routeProps => <UserList users={this.state.users} />} />
+          <Route path='/users/:user' render={routeProps => <UserView user={this.state.user} onEnter={e => this.onEnter(e)}/>} />
+          <Route path='/users' render={routeProps => <UserList users={this.state.users} handleUserClick={this.handleUserClick.bind(this)} />} />
           <Redirect from='/' to='/repos' />
         </Switch>
       </div>
@@ -64,6 +76,6 @@ class App extends React.Component {
 
 ReactDOM.render((
   <HashRouter>
-    <App />
+     <Route path="/" component={App} />
   </HashRouter>
 ), document.getElementById('app'));

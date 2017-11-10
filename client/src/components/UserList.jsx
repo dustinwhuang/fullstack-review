@@ -1,10 +1,10 @@
 import React from 'react';
 import UserListView from './UserListView.jsx';
 
-const UserList = ({users}) => (
+const UserList = ({users, handleUserClick}) => (
   <div>
     <h4>All Users</h4>
-    {users.map((user, key) => <UserListView user={user} key={key} />)}
+    {users.map((user, key) => <UserListView user={user} key={key} handleUserClick={handleUserClick} />)}
   </div>
 )
 

@@ -100,8 +100,7 @@ const getUserRepos = (id) => {
 const getUserFriends = (user) => {
   return new Promise((resolve, reject) => {
     Contributor.find().populate({path: 'repo_id', populate: {path: 'owner'}})
-      // .exec((err, friends) => console.log(friends.filter(friend => console.log(friend.repo_id.owner.login, friend.login))));
-      .exec((err, friends) => resolve(friends.filter(friend => friend.repo_id.owner._id === parseInt(user._id) && friend.repo_id.owner.login !== friend.login)));
+      .exec((err, friends) => resolve(friends.filter(friend => user && friend.repo_id.owner._id === parseInt(user._id) && friend.repo_id.owner.login !== friend.login)));
   });
 };
 
