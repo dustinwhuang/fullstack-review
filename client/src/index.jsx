@@ -24,7 +24,7 @@ class App extends React.Component {
   search (term) {
     // console.log(`${term} was searched`);
     
-    $.post('http://localhost:1128/repos', {username: term})
+    $.post('/repos', {username: term})
       .then(modified => {
         this.setState({modified: modified});
         this.updateRepos();
@@ -33,12 +33,12 @@ class App extends React.Component {
   }
 
   updateRepos() {
-    $.get('http://localhost:1128/repos')
+    $.get('/repos')
       .then(results => this.setState({repos: results}));
   }
 
   updateUsers() {
-    $.get('http://localhost:1128/users')
+    $.get('/users')
       .then(results => this.setState({users: results}));
   }
 

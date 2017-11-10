@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const gh = require('../helpers/github');
 mongoose.Promise = global.Promise;
 
-mongoose.connect('mongodb://localhost/fetcher', {useMongoClient: true});
+// mongoose.connect('mongodb://localhost/fetcher', {useMongoClient: true});
+mongoose.connect(`mongodb://hackreactor:${process.env.DBPASSWORD}@ds044689.mlab.com:44689/github-fetcher`, {useMongoClient: true});
 
 let repoSchema = mongoose.Schema({
   _id: Number,

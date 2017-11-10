@@ -17,7 +17,7 @@ class UserView extends React.Component {
       this.updateUserRepos(props.user);
       this.updateUserFriends(props.user);
     } else {
-    $.get('http://localhost:1128/users')
+    $.get('/users')
       .then(results => results.find(result => result.login === window.location.hash.match(/\/users\/(.*)/)[1]))
       .then(user => {
         this.state.user = user;
@@ -28,12 +28,12 @@ class UserView extends React.Component {
   }
 
   updateUserRepos(user) {
-    return $.get('http://localhost:1128/user', {user: user})
+    return $.get('/user', {user: user})
       .then(results => this.setState({repos: results}));
   }
 
   updateUserFriends(user) {
-    return $.get('http://localhost:1128/user/friends', {user: user})
+    return $.get('/user/friends', {user: user})
       .then(results => this.setState({friends: results}));
   }
 
