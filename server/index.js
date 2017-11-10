@@ -16,7 +16,7 @@ app.post('/repos', function (req, res) {
   // save the repo information in the database
   gh.getReposByUsername(req.body.username)
     .then(repos => db.save(repos))
-    .then(modified => res.send(modified));
+    .then(response => res.send(response));
 });
 
 app.get('/repos', function (req, res) {

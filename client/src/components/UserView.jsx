@@ -1,7 +1,6 @@
 import React from 'react';
 import $ from 'jquery';
 import RepoListView from './RepoListView.jsx';
-import {withRouter} from 'react-router-dom';
 
 class UserView extends React.Component {
   constructor(props) {
@@ -13,18 +12,31 @@ class UserView extends React.Component {
       user: ''
     }
 
-    if (props.user._id) {
+    let username = window.location.hash.match(/\/users\/(.*)/)[1];
+    if (props.user.login && props.user.login === username) {
       this.updateUserRepos(props.user);
       this.updateUserFriends(props.user);
     } else {
+      $.get('/users')
+        .then(results => results.find(result => result.login === username))
+        .then(user => {
+          this.state.user = user;
+          this.updateUserRepos(user);
+          this.updateUserFriends(user);
+        });
+    }
+  }
+
+  // Rerender on select
+  componentWillReceiveProps(nextProps) {
+    let username = window.location.hash.match(/\/users\/(.*)/)[1];
     $.get('/users')
-      .then(results => results.find(result => result.login === window.location.hash.match(/\/users\/(.*)/)[1]))
+      .then(results => results.find(result => result.login === username))
       .then(user => {
-        this.state.user = user;
-        this.updateUserRepos(user);
+        this.updateUserRepos(user)
+          .then(this.setState({user: user}));
         this.updateUserFriends(user);
       });
-    }
   }
 
   updateUserRepos(user) {
@@ -40,10 +52,8 @@ class UserView extends React.Component {
   render() {
     return (
       <div>
-        <a href={`https://github.com/${this.props.user.login}`}><h2>{this.props.user.login || this.state.user.login}</h2></a>
-          <select onChange={e => location = `https://github.com/${e.target.value}`}
-                  onClick={() => this.updateUserFriends(this.props.user)}
-                  >
+        <h2><a href={`https://github.com/${this.state.user.login || this.props.user.login}`}>{this.state.user.login || this.props.user.login}</a></h2>
+          <select onChange={e => this.props.search(e.target.value)}>
             <option>Friends</option>
             {this.state.friends.map(({login}, key) => <option value={login} key={key}>{login}</option>)}
           </select>

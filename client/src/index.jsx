@@ -22,33 +22,31 @@ class App extends React.Component {
   }
 
   search (term) {
-    // console.log(`${term} was searched`);
-    
     $.post('/repos', {username: term})
-      .then(modified => {
+      .then(({user, modified}) => {
         this.setState({modified: modified});
-        this.updateRepos();
+        this.updateRepos()
+          .then(() => {
+            this.setState({user: user});
+            this.props.history.push(`/users/${user.login}`);
+          });
         this.updateUsers();
       });
   }
 
   updateRepos() {
-    $.get('/repos')
+    return $.get('/repos')
       .then(results => this.setState({repos: results}));
   }
 
   updateUsers() {
-    $.get('/users')
+    return $.get('/users')
       .then(results => this.setState({users: results}));
   }
 
   handleUserClick(user) {
     this.setState({user: user});
     this.props.history.push(`/users/${user.login}`);
-  }
-
-  onEnter(e) {
-    console.log(e);
   }
 
   render () {
@@ -65,7 +63,7 @@ class App extends React.Component {
         </h3>
         <Switch>
           <Route path='/repos' render={routeProps => <RepoList repos={this.state.repos} />} />
-          <Route path='/users/:user' render={routeProps => <UserView user={this.state.user} onEnter={e => this.onEnter(e)}/>} />
+          <Route path='/users/:user' render={routeProps => <UserView user={this.state.user} search={this.search.bind(this)} />} />
           <Route path='/users' render={routeProps => <UserList users={this.state.users} handleUserClick={this.handleUserClick.bind(this)} />} />
           <Redirect from='/' to='/repos' />
         </Switch>

@@ -35,7 +35,8 @@ let save = (repos) => {
       reject('Not valid repos');
     }
 
-    User.create({_id: repos[0].owner.id, login: repos[0].owner.login})
+    let user = {_id: repos[0].owner.id, login: repos[0].owner.login};
+    User.create(user)
       .catch(() => {/* ignore duplicate error */});
 
     let status = {added: 0, updated: 0, skipped: 0};
@@ -71,7 +72,7 @@ let save = (repos) => {
 
     const completed = () => {
       if (status.added + status.updated + status.skipped === repos.length) {
-        resolve(status);
+        resolve({user: user, modified: status});
       }
     }
   });
